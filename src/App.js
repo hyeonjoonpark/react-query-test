@@ -1,25 +1,39 @@
-import logo from './logo.svg';
 import './App.css';
+import { useQuery, QueryClient, QueryClientProvider } from '@tanstack/react-query';
+
+// QueryClient 인스턴스 생성
+const queryClient = new QueryClient();
 
 function App() {
+  const { data, isLoading } = useQuery({
+    queryKey: ['todos'],
+    queryFn: async () => {
+      const response = await fetch('https://jsonplaceholder.typicode.com/todos');
+      return response.json();
+    },
+  });
+
+  if (isLoading) return <p>Loading...</p>;
+
   return (
     <div className="App">
-      <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <p>
-          Edit <code>src/App.js</code> and save to reload.
-        </p>
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Learn React
-        </a>
-      </header>
+      <h1>React Query</h1>
+      <ul>
+        {data.map((todo) => (
+          <li key={todo.id}>{todo.title}</li>
+        ))}
+      </ul>
     </div>
   );
 }
 
-export default App;
+// App 컴포넌트를 QueryClientProvider로 감싸기
+function AppWrapper() {
+  return (
+    <QueryClientProvider client={queryClient}>
+      <App />
+    </QueryClientProvider>
+  );
+}
+
+export default AppWrapper;
